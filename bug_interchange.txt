@@ -1,0 +1,227 @@
+Introduction
+--------------------
+This format is a bug interchange format to be used to transfer (partial)
+bugs between bug trackers. This format is suitable to be used both for
+full bug transfers or for partial updates. The latter case would be if
+an issue had a metadata change or comments added.
+
+Goals and Use Cases
+--------------------
+The goals of this format are to facilitate sharing bugs between multiple
+bug trackers using different software and further to allow partial and
+efficient sharing. The following usecases will hopefully describe these
+goals more clearly.
+
+1)
+Consider the case of a project (Foomater) which is packaged in several
+different Linux distributions (Debian and Redhat). Each of the three
+entities has their own bug tracker and will have bugs related to
+Foomater. It would be advantageous if Debian can relay bugs created in
+their tracker to the Foomater author and any conversation which occurs
+for that bug. Let us call this BugX.
+
+It would be better still if Redhat could then import BugX into their
+tracker from the Foomater tracker to be linked to when a similar bug is
+raised in their system. Comments in the Redhat tracker should also be
+distributed back to the Foomater tracker where they will eventually be
+distributed back to Debian.
+
+2)
+A system adminstrator has a list of bugs over a wide variety of software
+he wants to track. He doesn't have time to follow the development lists
+for all the software. What he would prefer to do is import the bugs into
+his local bug tracker so that his custom scripts will notify the right
+people within his organization as these bugs get fixed.
+
+This sysadmin would really prefer to subscribe to updates on a bug and
+then let custom scripts process these changes such that when the bug is
+fixed the internal issue is marked as unblocked.
+
+Example
+--------------------
+The bug interchange format is build upon JSON as it is well suited as a
+format which is human readable, resistant to whitespace mangling and
+easily parsed in many languages.
+
+{
+    "format" : "http://travisbrown.ca/projects/bug_interchange.txt",
+    "http://example.org/bug/12345" : {
+        "metadata" : {
+            "title" : "There is no documentation",
+            "created_at" : "2012-08-27T15:15:11Z",
+            "metadata_modified_at" : "2012-08-28T12:03:58Z",
+            "project_name" : "Foomater",
+            "project_id" : "b15ccefdaceed6d15679e3e0cde6bddd",
+            "status" : "Open",
+            "severity" : "Blocker",
+            "component" : "Documentation",
+            "reporter" : "bob@example.org",
+            "seen_in" : "Version 1.6a",
+            "owner" : "Unassigned",
+            "description" : "Foomater needs docs\nWrite them in SGML"
+        },
+        "54ca928424dd2a2fa8bb800fc" : {
+            "name" : "joe@example.org",
+            "created_at" : "2012-08-27T15:30:15Z",
+            "in-reply-to" : ["issue"],
+            "comment" : "We could go over this Tuesday"
+        },
+        "1595d407a9faff3d53147ac7a4ed5a67" : {
+            "name" : "bob@example.org",
+            "created_at" : "2012-08-27T17:00:02Z",
+            "in-reply-to" : ["54ca928424dd2a2fa8bb800fc", "issue"],
+            "comment" : "Sure"
+        }
+    },
+    "cb9099d7a9f6dea6ff50f3c54c16ed44" : {
+        "http://bugs.example.com/175/198" : {
+            "name" : "sue@example.com",
+            "created_at" : "2011-06-02T02:26:26Z",
+            "in-reply-to" : ["http://bugs.example.com/175/180", "issue"],
+            "comment" : "Please attach the tracelog"
+        }
+    }
+}
+
+This example only shows the required fields. It shows one complete bug
+with two comments and then a third bug which is only getting an
+additional comment.
+
+Summary of Format
+--------------------
+o format description
+o bug
+    o metadata (optional)
+        o metadata_modified_at
+	o one or more fields of metadata to modify
+    o comment (zero or many)
+        o created_at
+	o name
+	o in-reply-to list of comments
+	o comment content
+o bug...
+
+ID Format
+--------------------
+IDs are arbitrary strings which are intended to uniquely identify an
+issue or comment. Three recommended approaches to generating IDs are:
+	- Fully qualified URL, e.g. http://example.org/bugs/12345
+	- UUID
+	- Cryptographic hash of the content in some unspecified format
+	- Email message IDs, e.g. 20120828031116.GA14456@jupiter
+
+Timestamp Format
+--------------------
+All timestamps are in ISO 8601 format. The preferred subset of ISO 8601
+is the full standard date and time with timezone with accuracy to the
+second. ie. 2012-08-28T14:29:13-0800. Use of the week date or ordinal
+date forms is strongly discouraged.
+
+Outermost Level
+--------------------
+The outermost level of the bug interchange format is a set of one or
+more bugs. Multiple bugs are allowed within a single stream to ease bulk
+importation or updating. Each bug has a globally unique ID as the key.
+
+Also in the outermost level is a single value with the key "format".
+This is intented to identify the format and version of the file. This
+should be an URL to the format specification.
+
+Bugs
+--------------------
+Each bug is a set of one or more components. There may be one or zero
+instances of the "metadata" key. The metadata key contains all the
+metadata about the bug. If the metadata key does not exist then this
+instance of the bug is an update. It is expected that the recipient
+already has a full copy of the required bug metadata.
+
+Every other key in the bug dictionary is the unique ID of a comment.
+
+Metadata
+--------------------
+The metadata object contains the metadata for a bug. If all of the
+required metadata fields exist then the bug is considered complete. If
+they do not all exist then this instance of the bug is considered an
+update to be applied to a previously synchronized version of the bug. A
+metadata object must always have the "metadata_modified_at" field. All
+other fields are optional in the case of an update. Additional fields
+may exist beyond those specified here are required. Support for them
+cannot be guaranteed. It is recommended that any such additional fields
+have their name prefixed with the underscore, such as "_target_version".
+
+The fields which are required for a bug to be considered complete are:
+
+title 
+	The short description of the bug
+created_at
+	The timestamp when the bug was created
+metadata_modified_at
+	The timestamp when this metadata object was last modified
+	locally, used for determining order of metadata changes. This
+	field must exist in every metadata object.
+project_name
+	Human name for the project. Intended to be an application name
+	and not a distribution name.
+project_id
+	Unique ID for the project to differentiate multiple projects
+	with the same name. For example "boot scripts" may be the
+	name of the project for several distributions, but should not be
+	combined.
+status
+	The current status of the bug.
+severity
+	The severity of the bug
+component
+	The component of the project which this bug has been narrowed
+	down to or otherwise affects. This is intended to be used by the
+	application author.
+reporter
+	Name or email address of the original person to report the issue
+seen_in
+	A human description of the build or version the issue was first
+	seen in.
+owner
+	The current owner of the bug, likely the person who is
+	responsible for tracking or fixing the issue.
+description
+	A free form description of the bug
+
+Comments
+--------------------
+Comments all have a unique ID and a small number of fields, all of which
+are required. Comments are considered immutable. Extra fields are
+allowed and should have their name prefixed with an underscore, as in
+"_division". The required fields are as follows:
+
+name
+	The name or email address of the person entering the comment
+created_at
+	The timestpam at time of comment creation.
+in-reply-to
+	The list of the unique IDs of parent comments this comment is
+	in reply to. The array is ordered most recent to oldest. So the
+	direct parent is first followed by the grandparent, etc. The bug
+	itself has the special value "issue" is used. This field is
+	used to track comment threading. This array will contain a
+	minimum of one parent. This array can be truncated from the
+	tail, but it is recommended that a minimum of five parent IDs
+	are kept whenever applicable.
+comment
+	Free form field containing the comment.
+
+Partial Updates
+--------------------
+The ability to have optional components allows updates to bugs to be
+sent efficiently and in a way to minimize merging issues. If one bug
+tracker has the state of a bug changed to Closed then another bug
+tracker will receive just that state update. Thus minimizing unnecessary
+data transfer (the rest of the metadata) and unnecessary conflicts (if
+each tracker had a different owner for example). Additionally the
+comment list can be transfered in whole or in part.
+
+Partial updates also ease subscribing to changes to a particular bug.
+The subscription could be done via several mechanisms, email being one
+example, and whenever an update occurs at an upstream tracker (say an
+application's tracker) the changes can be immediately sent to the
+subscribing tracker (say a distribution's tracker or disconnected
+developer's local tracker).
