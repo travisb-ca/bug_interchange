@@ -1,0 +1,6 @@
+This is a project designed to facilitate bug interchange between various bug
+trackers. The bug interchange format is designed to make it easy to transfer
+bugs between different bug trackers.
+
+This project also includes a number of converters to convert bugs from various
+bug trackers into the portable bug interchange format.
