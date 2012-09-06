@@ -69,7 +69,25 @@ def get_comments(issue_url):
 	return comments
 
 def export_comment(comment_url):
-	pass
+	args = comment_url.split('/')
+	user = args[3]
+	repo = args[4]
+	issue = args[6].split('#')[0]
+	comment = args[6].split('-')[1]
+
+	url = '/repos/%s/%s/issues/comments/%s' % (user, repo, comment)
+
+	result = github_get(url)
+
+	comment = format_comment(result)
+
+	# Comments must be contained within a bug, but we have to reconstruct the bug URL
+	bugid = 'https://github.com/%s/%s/issues/%s' % (user, repo, issue)
+	export = {'format' : 'http://travisbrown.ca/projects/bug_interchange.txt'}
+	export[bugid] = {}
+	export[bugid][comment[0]] = comment[1]
+
+	print json.dumps(export, sort_keys=True, indent=4)
 
 # Returns a tuple of (key, object)
 def format_issue(bug, repository_url):
@@ -116,7 +134,9 @@ def export_issue(issue_url):
 
 	bug = format_issue(result, issue_url)
 
-	export = {bug[0] : bug[1]}
+	export = {'format' : 'http://travisbrown.ca/projects/bug_interchange.txt'}
+	export[bug[0]] = bug[1]
+
 	print json.dumps(export, sort_keys=True, indent=4)
 
 def export_repository(repository_url):
