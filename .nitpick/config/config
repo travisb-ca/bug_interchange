@@ -1,0 +1,9 @@
+components: Documentation
+fix_by: Next_Release
+priority: 1 2 3 4 5
+resolution: None Fixed Duplicate WontFix Invalid WorksForMe
+severity: Blocker Critical Major Minor Trivial
+state: New Confirmed Open Diagnosed Fixed Closed
+type: Bug Feature Regression
+vcs: svn
+--
