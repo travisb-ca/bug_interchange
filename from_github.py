@@ -97,7 +97,19 @@ def format_issue(bug, repository_url):
 	return (bugid, export)
 
 def export_issue(issue_url):
-	pass
+	args = issue_url.split('/')
+	user = args[3]
+	repo = args[4]
+	issue = args[6]
+
+	url = '/repos/%s/%s/issues/%s' % (user, repo, issue)
+
+	result = github_get(url)
+
+	bug = format_issue(result, issue_url)
+
+	export = {bug[0] : bug[1]}
+	print json.dumps(export, sort_keys=True, indent=4)
 
 def export_repository(repository_url):
 	args = repository_url.split('/')
