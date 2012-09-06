@@ -60,6 +60,45 @@ def get_comments(issue_url):
 
 	return comments
 
+def export_comment(comment_url):
+	pass
+
+# Returns a tuple of (key, object)
+def format_issue(bug, repository_url):
+	repo = repository_url.split('/')[4]
+
+	bugid = bug['html_url']
+	export = {}
+
+	export['metadata'] = {}
+	export['metadata']['title'] = bug['title']
+	export['metadata']['created_at'] = bug['created_at']
+	export['metadata']['metadata_modified_at'] = bug['updated_at']
+	export['metadata']['project_name'] = repo
+	export['metadata']['project_id'] = repository_url
+	export['metadata']['status'] = bug['state']
+	export['metadata']['severity'] = ''
+	export['metadata']['component'] = ''
+	export['metadata']['reporter'] = bug['user']['login']
+	export['metadata']['seen_in'] = ''
+
+	if bug['assignee'] == None:
+		export['metadata']['owner'] = 'Unassigned'
+	else:
+		export['metadata']['owner'] = bug['assignee']['login']
+
+	export['metadata']['description'] = bug['body']
+
+	comments = get_comments(bugid)
+
+	for comment in comments.keys():
+		export[comment] = comments[comment]
+	
+	return (bugid, export)
+
+def export_issue(issue_url):
+	pass
+
 def export_repository(repository_url):
 	args = repository_url.split('/')
 	user = args[3]
@@ -71,37 +110,22 @@ def export_repository(repository_url):
 
 	export = {'format' : 'http://travisbrown.ca/projects/bug_interchange.txt'}
 	for bug in result:
-		bugid = bug['html_url']
-		export[bugid] = {}
+		formatted = format_issue(bug, repository_url)
 
-		export[bugid]['metadata'] = {}
-		export[bugid]['metadata']['title'] = bug['title']
-		export[bugid]['metadata']['created_at'] = bug['created_at']
-		export[bugid]['metadata']['metadata_modified_at'] = bug['updated_at']
-		export[bugid]['metadata']['project_name'] = repo
-		export[bugid]['metadata']['project_id'] = repository_url
-		export[bugid]['metadata']['status'] = bug['state']
-		export[bugid]['metadata']['severity'] = ''
-		export[bugid]['metadata']['component'] = ''
-		export[bugid]['metadata']['reporter'] = bug['user']['login']
-		export[bugid]['metadata']['seen_in'] = ''
-
-		if bug['assignee'] == None:
-			export[bugid]['metadata']['owner'] = 'Unassigned'
-		else:
-			export[bugid]['metadata']['owner'] = bug['assignee']['login']
-
-		export[bugid]['metadata']['description'] = bug['body']
-
-		comments = get_comments(bugid)
-
-		for comment in comments.keys():
-			export[bugid][comment] = comments[comment]
+		export[formatted[0]] = formatted[1]
 
 	print json.dumps(export, sort_keys=True, indent=4)
 
 if __name__ == '__main__':
-	print sys.argv
+	if len(sys.argv) == 1:
+		print 'Usage: from_github.py repoURL    - export all issues for repository'
+		print '       from_github.py issueURL   - export particular issue'
+		print '       from_github.py commentURL - export particular issue comment'
+		sys.exit(1)
 
-	if len(sys.argv) == 2:
+	if 'issuecomment' in sys.argv[1]:
+		export_comment(sys.argv[1])
+	elif 'issues' in sys.argv[1]:
+		export_issue(sys.argv[1])
+	else:
 		export_repository(sys.argv[1])
