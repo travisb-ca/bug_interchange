@@ -37,6 +37,18 @@ def github_get(url):
 
 	return result
 
+# Returns a tuple of (key, object)
+def format_comment(comment):
+	commentid = comment['url']
+
+	comments = {}
+	comments['name'] = comment['user']['login']
+	comments['created_at'] = comment['created_at']
+	comments['in-reply-to'] = 'issue' # Github doesn't support threaded comments
+	comments['comment'] = comment['body']
+
+	return (commentid, comments)
+
 def get_comments(issue_url):
 	args = issue_url.split('/')
 	user = args[3]
@@ -50,13 +62,9 @@ def get_comments(issue_url):
 	comments = {}
 
 	for comment in result:
-		commentid = comment['url']
+		export = format_comment(comment)
 
-		comments[commentid] = {}
-		comments[commentid]['name'] = comment['user']['login']
-		comments[commentid]['created_at'] = comment['created_at']
-		comments[commentid]['in-reply-to'] = 'issue' # Github doesn't support threaded comments
-		comments[commentid]['comment'] = comment['body']
+		comments[export[0]] = export[1]
 
 	return comments
 
