@@ -4,3 +4,6 @@ bugs between different bug trackers.
 
 This project also includes a number of converters to convert bugs from various
 bug trackers into the portable bug interchange format.
+
+The primary bug tracker for interchange has a static snapshot available at
+http://travisbrown.ca/projects/bug_interchange/issues/
