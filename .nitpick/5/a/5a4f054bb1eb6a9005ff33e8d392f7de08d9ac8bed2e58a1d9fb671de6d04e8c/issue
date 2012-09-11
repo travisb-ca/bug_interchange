@@ -1,0 +1,18 @@
+Component: New_Converters
+Date: 2012-09-11 05:00:43
+Depends_On: 
+Duplicate_Of: 
+Fix_By: 1.0
+Owner: travisb@travisbrown.ca
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Email Tracker
+Type: Feature
+--
+Most of the work on many bugs is in the form of discussion. The best place for discussions are email lists. Since many bug trackers have email modules it would be good if there was a converter which took an ongoing email conversation (perhaps in some not-quite freeform format) and produced bug interchange chunks.
+
+Then active discussion can happen on a mailing list, but the archival is done well sorted automatically into a bug tracker.
