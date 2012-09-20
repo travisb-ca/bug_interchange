@@ -61,8 +61,6 @@ def authenticate():
 
 	result = github_post('/authorizations', json.dumps(auth_args), auth_header)
 
-	print result
-
 	if 'token' not in result.keys():
 		print 'Failed to authenticate'
 		return None
@@ -92,6 +90,8 @@ def load_config():
 		config['token'] = authenticate()
 		if config['token'] != None:
 			save_config(config)
+			return config
+		return None
 	else:
 		config = None
 
@@ -103,6 +103,32 @@ def load_config():
 				github, original = line.split(' ', 1)
 				config[github] = original
 
-	return config
+		return config
 
-print load_config()
+# Returns the URL of the new issue, or None if creating the issue failed
+def push_issue(issue, user, repo, token):
+	url = '/repos/%s/%s/issues' % (user, repo)
+	auth_header = {'Authorization' : 'Bearer %s' % token}
+	result = github_post(url, json.dumps(issue, indent = 4), auth_header)
+
+	if 'html_url' not in result:
+		return None
+	else:
+		return result['html_url']
+
+config = load_config()
+if config == None:
+	sys.exit(1)
+
+issue = {
+		'title' : 'issue title 3',
+		'body' : 'This is my issue. Please fix it',
+	}
+
+result = push_issue(issue, 'travisb-ca', 'test-repo', config['token'])
+
+if result == None:
+	print "Failed to create issue"
+	sys.exit(1)
+
+print 'Created issue %s' % result
