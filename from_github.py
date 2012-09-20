@@ -115,6 +115,9 @@ def format_issue(bug, repository_url):
 
 	export['metadata']['description'] = bug['body']
 
+	if bug['milestone'] != None:
+		export['metadata']['_fixby'] = bug['milestone']['title']
+
 	comments = get_comments(bugid)
 
 	for comment in comments.keys():
