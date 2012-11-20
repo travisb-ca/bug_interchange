@@ -12,6 +12,8 @@ Severity: Major
 State: Open
 Title: Email Tracker
 Type: Feature
+Units_of_Work: 1000
+Percent_Complete: 0
 --
 Most of the work on many bugs is in the form of discussion. The best place for discussions are email lists. Since many bug trackers have email modules it would be good if there was a converter which took an ongoing email conversation (perhaps in some not-quite freeform format) and produced bug interchange chunks.
 
