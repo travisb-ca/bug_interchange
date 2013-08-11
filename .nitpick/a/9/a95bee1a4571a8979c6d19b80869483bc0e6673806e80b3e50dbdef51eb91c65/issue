@@ -1,0 +1,18 @@
+Component: New_Converters
+Date: 2013-08-11 03:18:46
+Depends_On: 
+Duplicate_Of: 
+Fix_By: Next_Release
+Owner: travisb@travisbrown.ca
+Percent_Complete: 0
+Priority: 1
+Reported_By: travisb@travisbrown.ca
+Resolution: None
+Seen_In_Build: 
+Severity: Major
+State: Open
+Title: Bugzilla Converter
+Type: Feature
+Units_of_Work: 1000
+--
+There are a lot of Bugzilla trackers out there and it'd be handy to be able to at least import from it's XML format to have a local mirror of the bug database.
